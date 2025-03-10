@@ -2,36 +2,30 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var photoStore = PhotoStore()
-    @State private var isShowingImagePicker = false
+    
+    // State for image selection
     @State private var inputImage: UIImage?
+    @State private var sourceType: UIImagePickerController.SourceType = .camera
+    
+    // Sheet control states
+    @State private var isShowingImagePicker = false
+    @State private var isShowingSourcePicker = false
     @State private var isShowingCaptionDialog = false
-    @State private var caption = ""
     @State private var isShowingShareSheet = false
+    @State private var isShowingDeleteConfirmation = false
+    
+    // Other state
+    @State private var caption = ""
     @State private var pdfURL: URL?
     @State private var indexSetToDelete: IndexSet?
-    @State private var isShowingDeleteConfirmation = false
     
     var body: some View {
         NavigationView {
             List {
-                ForEach(photoStore.photoEntries) { entry in
-                    HStack {
-                        if let thumbnail = entry.thumbnailImage {
-                            Image(uiImage: thumbnail)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 60, height: 60)
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                        } else {
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.gray)
-                                .frame(width: 60, height: 60)
-                        }
-                        
-                        Text(entry.caption)
-                            .padding(.leading, 8)
+                ForEach(Array(photoStore.photoEntries.enumerated()), id: \.element.id) { index, entry in
+                    NavigationLink(destination: PhotoDetailView(photoStore: photoStore, entry: entry, entryIndex: index)) {
+                        photoRowView(for: entry)
                     }
-                    .padding(.vertical, 4)
                 }
                 .onDelete(perform: confirmDelete)
             }
@@ -39,9 +33,7 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
-                        Button(action: {
-                            isShowingImagePicker = true
-                        }) {
+                        Button(action: showSourcePicker) {
                             Image(systemName: "plus")
                         }
                         
@@ -54,26 +46,37 @@ struct ContentView: View {
                     }
                 }
             }
-            .sheet(isPresented: $isShowingImagePicker, onDismiss: loadImage) {
-                ImagePicker(image: $inputImage)
+            // Actions sheet to choose source
+            .actionSheet(isPresented: $isShowingSourcePicker) {
+                ActionSheet(
+                    title: Text("Add Photo"),
+                    message: Text("Choose a source"),
+                    buttons: [
+                        .default(Text("Take Photo")) {
+                            if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                                sourceType = .camera
+                                isShowingImagePicker = true
+                            }
+                        },
+                        .default(Text("Choose from Library")) {
+                            sourceType = .photoLibrary
+                            isShowingImagePicker = true
+                        },
+                        .cancel()
+                    ]
+                )
             }
-            .alert("Add Caption", isPresented: $isShowingCaptionDialog) {
-                TextField("Caption", text: $caption)
-                Button("Save") {
-                    if let image = inputImage, let imageData = image.jpegData(compressionQuality: 0.8) {
-                        photoStore.addPhoto(imageData: imageData, caption: caption)
-                        caption = ""
-                    }
-                }
-                Button("Cancel", role: .cancel) {
-                    caption = ""
-                }
+            // Image picker sheet
+            .sheet(isPresented: $isShowingImagePicker, onDismiss: handleSelectedImage) {
+                ImagePicker(image: $inputImage, sourceType: sourceType)
             }
+            // Share sheet
             .sheet(isPresented: $isShowingShareSheet) {
                 if let pdfURL = pdfURL {
                     ShareSheet(items: [pdfURL])
                 }
             }
+            // Delete confirmation alert
             .alert("Delete Photo", isPresented: $isShowingDeleteConfirmation) {
                 Button("Cancel", role: .cancel) {
                     indexSetToDelete = nil
@@ -87,30 +90,76 @@ struct ContentView: View {
             } message: {
                 Text("Are you sure you want to delete this photo? This action cannot be undone.")
             }
+            // Caption dialog
+            .alert("Add Caption", isPresented: $isShowingCaptionDialog) {
+                TextField("Caption", text: $caption)
+                Button("Save") {
+                    saveNewPhoto()
+                }
+                Button("Cancel", role: .cancel) {
+                    caption = ""
+                    inputImage = nil
+                }
+            }
         }
     }
     
-    func loadImage() {
+    // MARK: - Row View
+    
+    private func photoRowView(for entry: PhotoEntry) -> some View {
+        HStack {
+            // Thumbnail image
+            Group {
+                if let thumbnail = entry.thumbnailImage {
+                    Image(uiImage: thumbnail)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                } else {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.gray)
+                        .frame(width: 60, height: 60)
+                }
+            }
+            
+            // Caption
+            Text(entry.caption)
+                .lineLimit(2)
+                .padding(.leading, 8)
+        }
+        .padding(.vertical, 4)
+    }
+    
+    // MARK: - Helper Methods
+    
+    private func showSourcePicker() {
+        isShowingSourcePicker = true
+    }
+    
+    private func handleSelectedImage() {
         if inputImage != nil {
             isShowingCaptionDialog = true
         }
     }
     
-    func exportPhotos() {
+    private func saveNewPhoto() {
+        if let image = inputImage, let imageData = image.jpegData(compressionQuality: 0.8) {
+            photoStore.addPhoto(imageData: imageData, caption: caption)
+            caption = ""
+            inputImage = nil
+        }
+    }
+    
+    private func exportPhotos() {
         pdfURL = photoStore.exportToPDF()
         if pdfURL != nil {
             isShowingShareSheet = true
         }
     }
     
-    func confirmDelete(at indexSet: IndexSet) {
+    private func confirmDelete(at indexSet: IndexSet) {
         indexSetToDelete = indexSet
         isShowingDeleteConfirmation = true
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static var previews: some View {
-        ContentView()
     }
 }

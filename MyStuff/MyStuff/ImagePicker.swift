@@ -1,20 +1,46 @@
-//
-//  ImagePicker.swift
-//  PhotoNote
-//
-//  Created by Ryan Cabeen on 3/6/25.
-//
-
-
 import SwiftUI
 import UIKit
+import PhotosUI
 
 struct ImagePicker: UIViewControllerRepresentable {
     @Binding var image: UIImage?
+    var sourceType: UIImagePickerController.SourceType
     @Environment(\.presentationMode) var presentationMode
     
+    func makeUIViewController(context: Context) -> UIViewController {
+        // If we're using photo library
+        if sourceType == .photoLibrary {
+            let photoLibraryPicker = UIImagePickerController()
+            photoLibraryPicker.sourceType = .photoLibrary
+            photoLibraryPicker.delegate = context.coordinator
+            return photoLibraryPicker
+        }
+        // If we're using camera
+        else if sourceType == .camera && UIImagePickerController.isSourceTypeAvailable(.camera) {
+            let cameraPicker = UIImagePickerController()
+            cameraPicker.sourceType = .camera
+            cameraPicker.delegate = context.coordinator
+            return cameraPicker
+        }
+        // Fallback to photo library
+        else {
+            let fallbackPicker = UIImagePickerController()
+            fallbackPicker.sourceType = .photoLibrary
+            fallbackPicker.delegate = context.coordinator
+            return fallbackPicker
+        }
+    }
+    
+    func updateUIViewController(_ uiViewController: UIViewController, context: Context) {
+        // No updates needed
+    }
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
     class Coordinator: NSObject, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
-        var parent: ImagePicker
+        let parent: ImagePicker
         
         init(_ parent: ImagePicker) {
             self.parent = parent
@@ -31,27 +57,5 @@ struct ImagePicker: UIViewControllerRepresentable {
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
             parent.presentationMode.wrappedValue.dismiss()
         }
-    }
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-    
-    func makeUIViewController(context: Context) -> UIImagePickerController {
-        let picker = UIImagePickerController()
-        picker.delegate = context.coordinator
-        
-        // Use camera if available, otherwise use photo library
-        if UIImagePickerController.isSourceTypeAvailable(.camera) {
-            picker.sourceType = .camera
-        } else {
-            picker.sourceType = .photoLibrary
-        }
-        
-        return picker
-    }
-    
-    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {
-        // No updates needed
     }
 }
