@@ -2,6 +2,7 @@ import SwiftUI
 
 struct PhotoDetailView: View {
     @ObservedObject var photoStore: PhotoStore
+    @StateObject private var itemPriceStore: ItemPriceStore
     @EnvironmentObject var appSettings: AppSettings
     let entry: PhotoEntry
     let entryIndex: Int
@@ -13,6 +14,22 @@ struct PhotoDetailView: View {
     @State private var showAnalysisResult = false
     @State private var analysisError: String? = nil
     @State private var isShowingAPIKeySettings = false
+    @State private var isShowingItemPriceList = false
+    
+    // Initialize with potential existing item list
+    init(photoStore: PhotoStore, entry: PhotoEntry, entryIndex: Int) {
+        self.photoStore = photoStore
+        self.entry = entry
+        self.entryIndex = entryIndex
+        
+        // Create ItemPriceStore with existing items if available
+        let existingItems = entry.loadItemList()
+        let store = ItemPriceStore()
+        store.items = existingItems
+        
+        // Use StateObject to manage the store
+        _itemPriceStore = StateObject(wrappedValue: store)
+    }
     
     var body: some View {
         ScrollView {
@@ -55,12 +72,54 @@ struct PhotoDetailView: View {
                             .background(Color.green.opacity(0.1))
                             .cornerRadius(8)
                         
-                        Button("Use as Caption") {
-                            newCaption = analysisResult
-                            isEditingCaption = true
+                        HStack {
+                            Button("Use as Caption") {
+                                newCaption = analysisResult
+                                isEditingCaption = true
+                            }
+                            
+                            Button(entry.hasItemList ? "View Item List" : "Create Item List") {
+                                if entry.hasItemList {
+                                    // Restore existing item list
+                                    itemPriceStore.items = entry.loadItemList()
+                                } else {
+                                    // Create new item list
+                                    createItemListFromAnalysis()
+                                }
+                                isShowingItemPriceList = true
+                            }
+                            .background(
+                                NavigationLink(
+                                    destination: ItemPriceListView(
+                                        itemStore: itemPriceStore,
+                                        saveHandler: { saveItemListToPhoto() }
+                                    ),
+                                    isActive: $isShowingItemPriceList
+                                ) {
+                                    EmptyView()
+                                }
+                            )
                         }
                         .padding(.top, 4)
                         .disabled(analysisResult.isEmpty)
+                    }
+                }
+                
+                // If there's an existing item list, show a "View Item List" button
+                if entry.hasItemList {
+                    Button(action: {
+                        itemPriceStore.items = entry.loadItemList()
+                        isShowingItemPriceList = true
+                    }) {
+                        HStack {
+                            Image(systemName: "list.bullet")
+                            Text("View Saved Item List")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue.opacity(0.1))
+                        .foregroundColor(.blue)
+                        .cornerRadius(8)
                     }
                 }
                 
@@ -204,6 +263,36 @@ struct PhotoDetailView: View {
         
         photoStore.photoEntries[entryIndex] = updatedEntry
         photoStore.saveData()
+    }
+    
+    // New method to save item list to photo
+    private func saveItemListToPhoto() {
+        // Create a copy of the entry to modify
+        var updatedEntry = entry
+        
+        // Save the current item list to the photo entry
+        updatedEntry.saveItemList(itemPriceStore)
+        
+        // Update the photo store
+        photoStore.photoEntries[entryIndex] = updatedEntry
+        photoStore.saveData()
+    }
+    
+    // New method to create item list from OpenAI analysis
+    private func createItemListFromAnalysis() {
+        // Clear existing items
+        itemPriceStore.deleteAll()
+        
+        // Split the analysis result into individual items
+        let items = analysisResult
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        
+        // Add each item to the store
+        for item in items {
+            itemPriceStore.addItem(item)
+        }
     }
     
     // Helper to format date
