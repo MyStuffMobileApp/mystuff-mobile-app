@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var photoStore = PhotoStore()
+    @EnvironmentObject var appSettings: AppSettings
     
     // State for image selection
     @State private var inputImage: UIImage?
@@ -13,6 +14,7 @@ struct ContentView: View {
     @State private var isShowingCaptionDialog = false
     @State private var isShowingShareSheet = false
     @State private var isShowingDeleteConfirmation = false
+    @State private var isShowingAPIKeySettings = false
     
     // Other state
     @State private var caption = ""
@@ -43,8 +45,15 @@ struct ContentView: View {
                             Image(systemName: "square.and.arrow.up")
                         }
                         .disabled(photoStore.photoEntries.isEmpty)
+                        
+                        Button(action: { isShowingAPIKeySettings = true }) {
+                            Image(systemName: "key")
+                        }
                     }
                 }
+            }
+            .sheet(isPresented: $isShowingAPIKeySettings) {
+                APIKeySettingsView(appSettings: appSettings)
             }
             // Actions sheet to choose source
             .actionSheet(isPresented: $isShowingSourcePicker) {

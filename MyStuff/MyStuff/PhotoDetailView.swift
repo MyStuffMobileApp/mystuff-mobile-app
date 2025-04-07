@@ -2,12 +2,17 @@ import SwiftUI
 
 struct PhotoDetailView: View {
     @ObservedObject var photoStore: PhotoStore
+    @EnvironmentObject var appSettings: AppSettings
     let entry: PhotoEntry
     let entryIndex: Int
     
-    @State private var isShowingChatGPTInstructions = false
     @State private var newCaption: String = ""
     @State private var isEditingCaption = false
+    @State private var isAnalyzing = false
+    @State private var analysisResult: String = ""
+    @State private var showAnalysisResult = false
+    @State private var analysisError: String? = nil
+    @State private var isShowingAPIKeySettings = false
     
     var body: some View {
         ScrollView {
@@ -18,17 +23,45 @@ struct PhotoDetailView: View {
                 // Caption section
                 captionView
                 
-                // Analyze with ChatGPT button
-                Button(action: analyzeWithChatGPT) {
+                // Analyze with OpenAI API button
+                Button(action: analyzeWithOpenAI) {
                     HStack {
-                        Image(systemName: "sparkles.rectangle.stack")
-                        Text("Identify Objects with ChatGPT")
+                        if isAnalyzing {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle())
+                                .frame(width: 16, height: 16)
+                        } else {
+                            Image(systemName: "wand.and.stars")
+                        }
+                        Text("Analyze Image")
                     }
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.blue.opacity(0.1))
+                    .background(Color.green.opacity(0.1))
                     .foregroundColor(.primary)
                     .cornerRadius(8)
+                }
+                .disabled(isAnalyzing)
+                
+                // Analysis results section (only shown when there are results)
+                if !analysisResult.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Objects Identified")
+                            .font(.headline)
+                        
+                        Text(analysisResult)
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color.green.opacity(0.1))
+                            .cornerRadius(8)
+                        
+                        Button("Use as Caption") {
+                            newCaption = analysisResult
+                            isEditingCaption = true
+                        }
+                        .padding(.top, 4)
+                        .disabled(analysisResult.isEmpty)
+                    }
                 }
                 
                 // Date section
@@ -39,13 +72,26 @@ struct PhotoDetailView: View {
             .padding()
         }
         .navigationTitle("Photo Details")
-        .alert("Use ChatGPT to Identify Objects", isPresented: $isShowingChatGPTInstructions) {
-            Button("Continue") {
-                openChatGPT()
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                HStack {
+                    Button(action: {
+                        isEditingCaption = true
+                        newCaption = entry.caption
+                    }) {
+                        Image(systemName: "pencil")
+                    }
+                    
+                    Button(action: {
+                        isShowingAPIKeySettings = true
+                    }) {
+                        Image(systemName: "key")
+                    }
+                }
             }
-            Button("Cancel", role: .cancel) { }
-        } message: {
-            Text("The photo will be saved to your camera roll. ChatGPT will open with a prompt copied to your clipboard. Upload the photo to ChatGPT, paste the prompt, and get object identification.")
+        }
+        .sheet(isPresented: $isShowingAPIKeySettings) {
+            APIKeySettingsView(appSettings: appSettings)
         }
         .alert("Update Caption", isPresented: $isEditingCaption) {
             TextField("Caption", text: $newCaption)
@@ -55,6 +101,18 @@ struct PhotoDetailView: View {
             }
             
             Button("Cancel", role: .cancel) { }
+        }
+        .alert(isPresented: Binding<Bool>(
+            get: { analysisError != nil },
+            set: { if !$0 { analysisError = nil } }
+        )) {
+            Alert(
+                title: Text("Analysis Error"),
+                message: Text(analysisError ?? "Unknown error occurred"),
+                dismissButton: .default(Text("OK")) {
+                    analysisError = nil
+                }
+            )
         }
     }
     
@@ -88,14 +146,6 @@ struct PhotoDetailView: View {
                     .font(.headline)
                 
                 Spacer()
-                
-                Button(action: {
-                    newCaption = entry.caption
-                    isEditingCaption = true
-                }) {
-                    Image(systemName: "pencil")
-                        .font(.subheadline)
-                }
             }
             
             Text(entry.caption)
@@ -119,29 +169,30 @@ struct PhotoDetailView: View {
     
     // MARK: - Helper Methods
     
-    func analyzeWithChatGPT() {
-        // First show instructions
-        isShowingChatGPTInstructions = true
-    }
-    
-    func openChatGPT() {
-        // Save image to Photos album
-        if let image = entry.thumbnailImage {
-            UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
-            
-            // Create prompt for ChatGPT and copy to clipboard
-            let prompt = "What objects can you see in the most recent photo I've uploaded? Please list the main objects you can identify and suggest a brief caption that describes what's in the image."
-            UIPasteboard.general.string = prompt
-            
-            // Open ChatGPT app or website
-            if let chatGPTAppURL = URL(string: "chatgpt://") {
-                if UIApplication.shared.canOpenURL(chatGPTAppURL) {
-                    UIApplication.shared.open(chatGPTAppURL)
-                } else {
-                    // Fallback to the website if the app is not installed
-                    if let chatGPTWebURL = URL(string: "https://chat.openai.com") {
-                        UIApplication.shared.open(chatGPTWebURL)
-                    }
+    func analyzeWithOpenAI() {
+        guard let image = entry.thumbnailImage else {
+            analysisError = "Could not load image"
+            return
+        }
+        
+        guard appSettings.isAPIKeyConfigured, let openAIService = appSettings.getOpenAIService() else {
+            isShowingAPIKeySettings = true
+            return
+        }
+        
+        // Start analysis
+        isAnalyzing = true
+        analysisResult = ""
+        
+        openAIService.analyzeImage(image) { result in
+            DispatchQueue.main.async {
+                isAnalyzing = false
+                
+                switch result {
+                case .success(let content):
+                    analysisResult = content
+                case .failure(let error):
+                    analysisError = "Error analyzing image: \(error.localizedDescription)"
                 }
             }
         }
