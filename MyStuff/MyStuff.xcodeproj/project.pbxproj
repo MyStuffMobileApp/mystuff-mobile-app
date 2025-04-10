@@ -25,6 +25,12 @@
 		D3EB23992DA3AD4400F4B7BC /* ItemPriceListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3EB23982DA3AD4100F4B7BC /* ItemPriceListView.swift */; };
 		D3EB239A2DA3AD4400F4B7BC /* ItemPriceListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3EB23982DA3AD4100F4B7BC /* ItemPriceListView.swift */; };
 		D3EB239B2DA3AD4400F4B7BC /* ItemPriceListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3EB23982DA3AD4100F4B7BC /* ItemPriceListView.swift */; };
+		D3EB23A52DA8235200F4B7BC /* SplashScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3EB23A42DA8234F00F4B7BC /* SplashScreen.swift */; };
+		D3EB23A62DA8235200F4B7BC /* SplashScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3EB23A42DA8234F00F4B7BC /* SplashScreen.swift */; };
+		D3EB23A72DA8235200F4B7BC /* SplashScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3EB23A42DA8234F00F4B7BC /* SplashScreen.swift */; };
+		D3EB23A92DA8239C00F4B7BC /* AppIconHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3EB23A82DA8239A00F4B7BC /* AppIconHelper.swift */; };
+		D3EB23AA2DA8239C00F4B7BC /* AppIconHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3EB23A82DA8239A00F4B7BC /* AppIconHelper.swift */; };
+		D3EB23AB2DA8239C00F4B7BC /* AppIconHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3EB23A82DA8239A00F4B7BC /* AppIconHelper.swift */; };
 		DA5CB2FE2D7ABD3A00304BCF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5CB2F12D7ABD3A00304BCF /* ContentView.swift */; };
 		DA5CB3002D7ABD3A00304BCF /* PhotoEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5CB2F52D7ABD3A00304BCF /* PhotoEntry.swift */; };
 		DA5CB3012D7ABD3A00304BCF /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5CB2F22D7ABD3A00304BCF /* ImagePicker.swift */; };
@@ -79,6 +85,8 @@
 		D3EB23422DA3980700F4B7BC /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		D3EB23942DA3AD2400F4B7BC /* ItemModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemModel.swift; sourceTree = "<group>"; };
 		D3EB23982DA3AD4100F4B7BC /* ItemPriceListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ItemPriceListView.swift; sourceTree = "<group>"; };
+		D3EB23A42DA8234F00F4B7BC /* SplashScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SplashScreen.swift; sourceTree = "<group>"; };
+		D3EB23A82DA8239A00F4B7BC /* AppIconHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIconHelper.swift; sourceTree = "<group>"; };
 		DA5CB2EE2D7ABD3A00304BCF /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		DA5CB2F02D7ABD3A00304BCF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DA5CB2F12D7ABD3A00304BCF /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -133,6 +141,8 @@
 		DA5CB2F82D7ABD3A00304BCF /* MyStuff */ = {
 			isa = PBXGroup;
 			children = (
+				D3EB23A82DA8239A00F4B7BC /* AppIconHelper.swift */,
+				D3EB23A42DA8234F00F4B7BC /* SplashScreen.swift */,
 				D3EB23942DA3AD2400F4B7BC /* ItemModel.swift */,
 				D3EB23982DA3AD4100F4B7BC /* ItemPriceListView.swift */,
 				DA5CB2EF2D7ABD3A00304BCF /* Preview Content */,
@@ -324,9 +334,11 @@
 			files = (
 				D3EB232F2D7AD56600F4B7BC /* PhotoSourceSelector.swift in Sources */,
 				DA5CB2FE2D7ABD3A00304BCF /* ContentView.swift in Sources */,
+				D3EB23A72DA8235200F4B7BC /* SplashScreen.swift in Sources */,
 				DA5CB3002D7ABD3A00304BCF /* PhotoEntry.swift in Sources */,
 				DA5CB3012D7ABD3A00304BCF /* ImagePicker.swift in Sources */,
 				DA5CB3022D7ABD3A00304BCF /* MyStuffApp.swift in Sources */,
+				D3EB23AB2DA8239C00F4B7BC /* AppIconHelper.swift in Sources */,
 				DA5CB3032D7ABD3A00304BCF /* PDFGenerator.swift in Sources */,
 				D3EB23952DA3AD2700F4B7BC /* ItemModel.swift in Sources */,
 				D3EB233F2DA397C700F4B7BC /* OpenAIService.swift in Sources */,
@@ -344,9 +356,11 @@
 			files = (
 				D3EB23312D7AD56600F4B7BC /* PhotoSourceSelector.swift in Sources */,
 				DA5CB3162D7ABD3A00304BCF /* ContentView.swift in Sources */,
+				D3EB23A62DA8235200F4B7BC /* SplashScreen.swift in Sources */,
 				DA5CB3182D7ABD3A00304BCF /* PhotoEntry.swift in Sources */,
 				DA5CB3192D7ABD3A00304BCF /* ImagePicker.swift in Sources */,
 				DA5CB31A2D7ABD3A00304BCF /* MyStuffApp.swift in Sources */,
+				D3EB23AA2DA8239C00F4B7BC /* AppIconHelper.swift in Sources */,
 				DA5CB31B2D7ABD3A00304BCF /* PDFGenerator.swift in Sources */,
 				D3EB23972DA3AD2700F4B7BC /* ItemModel.swift in Sources */,
 				D3EB23412DA397C700F4B7BC /* OpenAIService.swift in Sources */,
@@ -364,9 +378,11 @@
 			files = (
 				D3EB23302D7AD56600F4B7BC /* PhotoSourceSelector.swift in Sources */,
 				DA5CB30A2D7ABD3A00304BCF /* ContentView.swift in Sources */,
+				D3EB23A52DA8235200F4B7BC /* SplashScreen.swift in Sources */,
 				DA5CB30C2D7ABD3A00304BCF /* PhotoEntry.swift in Sources */,
 				DA5CB30D2D7ABD3A00304BCF /* ImagePicker.swift in Sources */,
 				DA5CB30E2D7ABD3A00304BCF /* MyStuffApp.swift in Sources */,
+				D3EB23A92DA8239C00F4B7BC /* AppIconHelper.swift in Sources */,
 				DA5CB30F2D7ABD3A00304BCF /* PDFGenerator.swift in Sources */,
 				D3EB23962DA3AD2700F4B7BC /* ItemModel.swift in Sources */,
 				D3EB23402DA397C700F4B7BC /* OpenAIService.swift in Sources */,

@@ -31,8 +31,16 @@ struct ContentView: View {
                 }
                 .onDelete(perform: confirmDelete)
             }
-            .navigationTitle("MyStuff")
             .toolbar {
+                ToolbarItem(placement: .principal) {
+                    HStack {
+                        AppIconImage(size: 30)
+                        Text("MyStuff")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                    }
+                }
+                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
                         Button(action: showSourcePicker) {

@@ -13,7 +13,7 @@ struct MyStuffApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            SplashScreen()
                 .environmentObject(appSettings)
         }
     }

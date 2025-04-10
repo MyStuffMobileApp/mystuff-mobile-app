@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "mystufflogo.png",
+      "filename" : "logo_upd.png",
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
@@ -27,20 +27,7 @@
       "idiom" : "universal",
       "platform" : "ios",
       "size" : "1024x1024"
-    },
-    {
-          "filename" : "mystufflogo.png",
-          "idiom" : "universal",
-          "scale" : "1x"
-        },
-        {
-          "idiom" : "universal",
-          "scale" : "2x"
-        },
-        {
-          "idiom" : "universal",
-          "scale" : "3x"
-        }
+    }
   ],
   "info" : {
     "author" : "xcode",
